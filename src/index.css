@@ -1,0 +1,28 @@
+/* @font-face {
+  font-family: 'bmfont';
+  src: url('src/assets/fonts/bmfont.ttf') format('truetype');
+} */
+
+body {
+  font-family: 'GowunDodum-Regular';
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, ‘Segoe UI’, ‘Roboto’, ‘Oxygen’, ‘Ubuntu’,
+    ‘Cantarell’, ‘Fira Sans’, ‘Droid Sans’, ‘Helvetica Neue’, ‘Jeju Gothic’, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, ‘Courier New’, monospace;
+}
+.jejugothic * {
+  font-family: ‘Jeju Gothic’, sans-serif;
+}
+
+@layer utilities {
+  .shadow-bottom {
+    box-shadow: 0 6px 2px -1px rgba(0, 0, 0, 0.1), 0 2px 0px -1px rgba(0, 0, 0, 0.1);
+  }
+}
