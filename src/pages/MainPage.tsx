@@ -1,8 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import CanvasDraw from 'react-canvas-draw'
 import styled from 'styled-components'
 
 function MainPage() {
   const [drawingMode, setDrawingMode] = useState(true)
+  const canvasRef = useRef(null)
 
   const handleDrawButtonClick = () => {
     setDrawingMode(true)
@@ -13,7 +15,7 @@ function MainPage() {
   }
 
   const handleCanvasClick = () => {
-    // 여기에 그림을 그리거나 지우는 로직을 추가할 수 있습니다.
+    // No need to add any logic here when using react-canvas-draw
   }
 
   return (
@@ -24,7 +26,13 @@ function MainPage() {
           <DrawButton onClick={handleDrawButtonClick}>그리기</DrawButton>
           <EraseButton onClick={handleEraseButtonClick}>지우기</EraseButton>
         </ToolBar>
-        <Canvas onClick={handleCanvasClick}></Canvas>
+        <CanvasDraw
+          ref={canvasRef}
+          brushColor={drawingMode ? 'black' : 'white'}
+          style={{ border: '2px solid #333' }}
+          canvasWidth={1800}
+          canvasHeight={800}
+        />
       </Container>
     </AppContainer>
   )
@@ -63,15 +71,6 @@ const ToolBar = styled.div`
   flex-direction: column;
   align-items: center;
   margin-right: 100px;
-`
-
-const Canvas = styled.div`
-  width: 1800px;
-  height: 800px;
-  border: 2px solid #333;
-  background-color: #fff;
-  margin-top: 20px;
-  cursor: crosshair;
 `
 
 const DrawButton = styled.button`
