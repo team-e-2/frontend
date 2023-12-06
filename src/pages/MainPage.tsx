@@ -2,10 +2,21 @@ import React, { useState, useRef } from 'react'
 import CanvasDraw from 'react-canvas-draw'
 import styled from 'styled-components'
 import html2canvas from 'html2canvas'
+import convert from '../assets/convert.png'
+import erase from '../assets/erase.png'
+import draw from '../assets/draw.png'
+import cat1 from '../assets/cat1.png'
+import cat2 from '../assets/cat2.png'
+import cat3 from '../assets/cat3.png'
+import cat4 from '../assets/cat4.png'
+import cat5 from '../assets/cat5.png'
+import addFeel from '../assets/addFeel.png'
 
 function MainPage() {
   const [drawingMode, setDrawingMode] = useState(true)
   const canvasRef = useRef<CanvasDraw | null>(null)
+  // MainPage 컴포넌트 내부에서 useState 추가
+  const [brushSize, setBrushSize] = useState(5) // 초기값은 5로 설정
 
   const handleDrawButtonClick = () => {
     setDrawingMode(true)
@@ -40,17 +51,35 @@ function MainPage() {
 
   return (
     <AppContainer>
-      <Header>EmotiArt</Header>
+      <Header>
+        <Title>EmotiArt</Title>
+        <RecommendWrap>
+          <Text>recomend emoticon :</Text>
+          <Recommend>
+            <img src={cat1} alt="Cat 1" />
+            <img src={cat2} alt="Cat 2" />
+            <img src={cat3} alt="Cat 3" />
+            <img src={cat4} alt="Cat 4" />
+            <img src={cat5} alt="Cat 5" />
+          </Recommend>
+        </RecommendWrap>
+      </Header>
       <Container>
         <ToolBar>
-          <DrawButton onClick={handleDrawButtonClick}>그리기</DrawButton>
-          <EraseButton onClick={handleEraseButtonClick}>지우기</EraseButton>
-          <SubmitButton onClick={handleCanvasClick}>그림 전송</SubmitButton>
+          <DrawButton onClick={handleDrawButtonClick} />
+          <EraseButton onClick={handleEraseButtonClick} />
+          <SizeSlider
+            value={brushSize}
+            onChange={(e) => setBrushSize(parseInt(e.target.value, 10))}
+          />
+          <SubmitButton onClick={handleCanvasClick} />
+          <AddFeelButton></AddFeelButton>
         </ToolBar>
         <Canvas id="canvas-draw">
           <CanvasDraw
             ref={canvasRef}
             brushColor={drawingMode ? 'black' : 'white'}
+            brushRadius={brushSize}
             style={{ border: '2px solid #333' }}
             canvasWidth={1800}
             canvasHeight={800}
@@ -79,6 +108,35 @@ const Header = styled.div`
   align-items: center;
   padding-left: 40px;
 `
+const Title = styled.div`
+  color: #333;
+  font-size: 40px;
+`
+
+const RecommendWrap = styled.div`
+  color: #333;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+`
+
+const Text = styled.div`
+  color: #333;
+  font-size: 30px;
+  margin-left: 110px;
+`
+const Recommend = styled.div`
+  color: #333;
+  font-size: 40px;
+  margin-left: 20px;
+  padding: 10px;
+
+  img {
+    width: 60px;
+    height: 60px;
+    margin-right: 5px;
+  }
+`
 
 const Container = styled.div`
   display: flex;
@@ -99,42 +157,95 @@ const ToolBar = styled.div`
 const Canvas = styled.div``
 
 const DrawButton = styled.button`
-  background-color: #4caf50;
+  background-color: #fff;
   color: white;
   padding: 10px 20px;
   font-size: 1em;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   border: none;
+
   cursor: pointer;
 
+  width: 60px;
+  height: 60px;
+  background-image: url(${draw});
+  background-size: cover; /* 이미지를 컨테이너에 맞게 조절 */
+  background-position: center; /* 이미지를 가운데 정렬 */
+
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2); /* 가로, 세로, 흐림 정도, 색상 */
+
   &:hover {
-    background-color: #45a049;
+    background-color: #676767;
   }
 `
 
 const EraseButton = styled.button`
-  background-color: #f44336;
+  background-color: #fff;
   color: white;
   padding: 10px 20px;
   font-size: 1em;
   border: none;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   cursor: pointer;
 
+  width: 60px;
+  height: 60px;
+  background-image: url(${erase});
+  background-size: cover; /* 이미지를 컨테이너에 맞게 조절 */
+  background-position: center; /* 이미지를 가운데 정렬 */
+
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2); /* 가로, 세로, 흐림 정도, 색상 */
+
   &:hover {
-    background-color: #d32f2f;
+    background-color: #676767;
   }
 `
 
+// SizeSlider 컴포넌트 추가
+const SizeSlider = styled.input.attrs({ type: 'range', min: 1, max: 20 })`
+  width: 80%;
+  margin-bottom: 100px;
+`
+
 const SubmitButton = styled.button`
-  background-color: #8f36f4;
+  background-color: #fff;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 20px;
+
+  width: 60px;
+  height: 60px;
+  background-image: url(${convert});
+  background-size: cover; /* 이미지를 컨테이너에 맞게 조절 */
+  background-position: center; /* 이미지를 가운데 정렬 */
+
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2); /* 가로, 세로, 흐림 정도, 색상 */
+
+  &:hover {
+    background-color: #676767;
+  }
+`
+
+const AddFeelButton = styled.button`
+  background-color: #fff;
   color: white;
   padding: 10px 20px;
   font-size: 1em;
   border: none;
   cursor: pointer;
 
+  width: 60px;
+  height: 60px;
+  background-image: url(${addFeel});
+  background-size: cover; /* 이미지를 컨테이너에 맞게 조절 */
+  background-position: center; /* 이미지를 가운데 정렬 */
+
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2); /* 가로, 세로, 흐림 정도, 색상 */
+
   &:hover {
-    background-color: #d32fd3;
+    background-color: #676767;
   }
 `
