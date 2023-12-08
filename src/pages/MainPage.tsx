@@ -26,24 +26,66 @@ function MainPage() {
     setDrawingMode(false)
   }
 
-  const handleCanvasClick = () => {
+  // const handleCanvasClick = () => {
+  //   if (canvasRef.current) {
+  //     // CanvasDraw 컴포넌트가 렌더링되는 DOM 요소를 캡처
+  //     const canvasElement = document.getElementById('canvas-draw')
+
+  //     if (canvasElement) {
+  //       html2canvas(canvasElement).then((canvas) => {
+  //         const drawingDataURL = canvas.toDataURL('image/png')
+
+  //         // 데이터 URL을 다운로드할 수 있는 링크를 생성합니다.
+  //         const downloadLink = document.createElement('a')
+  //         downloadLink.href = drawingDataURL
+  //         downloadLink.download = 'drawing.png'
+
+  //         // 링크를 클릭하여 다운로드를 시작합니다.
+  //         document.body.appendChild(downloadLink)
+  //         downloadLink.click()
+  //         document.body.removeChild(downloadLink)
+  //       })
+  //     }
+  //   }
+  // }
+
+  const handleSubmitClick = () => {
     if (canvasRef.current) {
       // CanvasDraw 컴포넌트가 렌더링되는 DOM 요소를 캡처
       const canvasElement = document.getElementById('canvas-draw')
 
       if (canvasElement) {
         html2canvas(canvasElement).then((canvas) => {
-          const drawingDataURL = canvas.toDataURL('image/png')
+          canvas.toBlob((blob) => {
+            if (blob) {
+              // blob이 null이 아닌 경우에만 실행
+              // FormData 객체를 생성하고 blob을 추가합니다.
+              const formData = new FormData()
+              formData.append('drawing', blob, 'drawing.png')
 
-          // 데이터 URL을 다운로드할 수 있는 링크를 생성합니다.
-          const downloadLink = document.createElement('a')
-          downloadLink.href = drawingDataURL
-          downloadLink.download = 'drawing.png'
-
-          // 링크를 클릭하여 다운로드를 시작합니다.
-          document.body.appendChild(downloadLink)
-          downloadLink.click()
-          document.body.removeChild(downloadLink)
+              // fetch API를 사용하여 POST 요청을 수행합니다.
+              fetch('http://127.0.0.1:8000/emotiart/api/upload/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+                body: formData,
+              })
+                .then((response) => {
+                  // 서버 응답을 처리합니다.
+                  if (response.ok) {
+                    console.log('123')
+                  } else {
+                    console.error('456')
+                  }
+                })
+                .catch((error) => {
+                  console.error('서버에 그림을 전송하는 도중 에러가 발생했습니다:', error)
+                })
+            } else {
+              console.error('blob이 null입니다.')
+            }
+          }, 'image/png')
         })
       }
     }
@@ -72,7 +114,7 @@ function MainPage() {
             value={brushSize}
             onChange={(e) => setBrushSize(parseInt(e.target.value, 10))}
           />
-          <SubmitButton onClick={handleCanvasClick} />
+          <SubmitButton onClick={handleSubmitClick} />
           <AddFeelButton></AddFeelButton>
         </ToolBar>
         <Canvas id="canvas-draw">
