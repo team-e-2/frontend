@@ -19,7 +19,7 @@ function MainPage() {
   const [brushSize, setBrushSize] = useState(5) // 초기값은 5로 설정
 
   // 받은 이미지를 저장할 상태 변수 및 Ref 추가
-  const [receivedImage, setReceivedImage] = useState<File | null>(null)
+  const [receivedImages, setReceivedImages] = useState<File[]>([]);
   const imageRef = useRef<HTMLImageElement>(null)
 
   const handleDrawButtonClick = () => {
@@ -31,59 +31,72 @@ function MainPage() {
   }
 
   const handleSubmitClick = () => {
-    if (canvasRef.current) {
-      // CanvasDraw 컴포넌트가 렌더링되는 DOM 요소를 캡처
-      const canvasElement = document.getElementById('canvas-draw')
+  if (canvasRef.current) {
+    // CanvasDraw 컴포넌트가 렌더링되는 DOM 요소를 캡처
+    const canvasElement = document.getElementById('canvas-draw');
 
-      if (canvasElement) {
-        html2canvas(canvasElement).then((canvas) => {
-          canvas.toBlob((blob) => {
-            if (blob) {
-              // blob이 null이 아닌 경우에만 실행
-              // FormData 객체를 생성하고 blob을 추가합니다.
-              const formData = new FormData()
-              formData.append('drawing', blob, 'drawing.png')
+    if (canvasElement) {
+      html2canvas(canvasElement).then((canvas) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            // FormData 객체를 생성하고 blob을 추가합니다.
+            const formData = new FormData();
+            formData.append('drawing', blob, 'drawing.png');
 
-              console.log(formData) // 여기로 이동
+            // 서버에 이미지를 전송
+            fetch('http://127.0.0.1:8000/rnn_app/receive/', {
+              method: 'POST',
+              body: formData,
+            })
+              .then((response) => response.json())  // JSON 형태로 응답을 받음
+              .then((data) => {
+                // 서버로부터 받은 이미지 데이터를 File 객체로 변환
+                const receivedImageFiles = data.images.map((imgData, index) => {
+                  const byteCharacters = atob(imgData.content);
+                  const byteNumbers = new Array(byteCharacters.length);
 
-              fetch('http://127.0.0.1:8000/emotiart/receive-image/', {
-                method: 'POST',
-                body: formData,
+                  for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                  }
+
+                  const byteArray = new Uint8Array(byteNumbers);
+                  const blob = new Blob([byteArray], { type: imgData.content_type });
+
+                  return new File([blob], imgData.filename, { type: imgData.content_type });
+                });
+
+                // 받은 이미지를 상태에 업데이트
+                setReceivedImages(receivedImageFiles);
               })
-                .then((response) => response.blob())
-                .then((blob) => {
-                  // Blob을 File 객체로 변환 (현재는 확장자를 'png'로 설정)
-                  const file = new File([blob], 'receivedImage.png', { type: 'image/png' })
-
-                  // 받은 이미지를 상태에 업데이트
-                  setReceivedImage(file)
-                })
-                .catch((error) => {
-                  console.error('서버에 그림을 전송하는 도중 에러가 발생했습니다:', error)
-                })
-            } else {
-              console.error('blob이 null입니다.')
-            }
-          }, 'image/png')
-        })
-      }
+              .catch((error) => {
+                console.error('서버에 그림을 전송하는 도중 에러가 발생했습니다:', error);
+              });
+          } else {
+            console.error('blob이 null입니다.');
+          }
+        }, 'image/png');
+      });
     }
   }
+};
+
 
   // 이미지가 변경될 때마다 호출되는 useEffect
   useEffect(() => {
     // 이미지 Ref가 존재하고 이미지 파일이 있다면 실행
-    if (imageRef.current && receivedImage) {
-      const reader = new FileReader()
+    if (imageRef.current && receivedImages.length > 0) {
+      // 이미지를 로드한 후, 이미지 Ref에 설정
+      const reader = new FileReader();
       reader.onload = () => {
         // 이미지를 로드한 후, 이미지 Ref에 설정
         if (imageRef.current) {
-          imageRef.current.src = reader.result as string
+          imageRef.current.src = reader.result as string;
         }
-      }
-      reader.readAsDataURL(receivedImage)
+      };
+      // 첫 번째 이미지를 사용하여 로드 (더 나은 방법으로 수정 가능)
+      reader.readAsDataURL(receivedImages[0]);
     }
-  }, [receivedImage])
+  }, [receivedImages]);
 
   return (
     <AppContainer>
@@ -91,17 +104,12 @@ function MainPage() {
         <Title>EmotiArt</Title>
         <RecommendWrap>
           <Text>recomend emoticon :</Text>
-          {/* <Recommend>
-            <img src={cat1} alt="Cat 1" />
-            <img src={cat2} alt="Cat 2" />
-            <img src={cat3} alt="Cat 3" />
-            <img src={cat4} alt="Cat 4" />
-            <img src={cat5} alt="Cat 5" />
-          </Recommend> */}
-          {receivedImage && (
+          {receivedImages.length > 0 && (
             <Recommend>
               {/* 이미지 Ref를 사용하여 이미지 표시 */}
-              <img ref={imageRef} alt="Received Image" />
+              {receivedImages.map((image, index) => (
+                <img key={index} src={URL.createObjectURL(image)} alt={`Received Image ${index + 1}`} />
+              ))}
             </Recommend>
           )}
         </RecommendWrap>
